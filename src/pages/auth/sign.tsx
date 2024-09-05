@@ -1,3 +1,3 @@
-export function Sign() {
+export function SignIn() {
   return <div>sign</div>;
 }
