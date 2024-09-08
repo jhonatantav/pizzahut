@@ -7,6 +7,8 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { toast } from 'sonner';
 import { Link, useNavigate } from 'react-router-dom';
+import { useMutation } from '@tanstack/react-query';
+import { registerRestaurant } from '@/api/register';
 
 export function SignUp() {
   const navigate = useNavigate();
@@ -20,20 +22,29 @@ export function SignUp() {
   const signUpForm = z.object({
     email: z.string().email(),
     managerName: z.string(),
-    restaurantPhone: z.number(),
+    phone: z.number(),
     restaurantName: z.string(),
   });
 
   type signUpForm = z.infer<typeof signUpForm>;
 
+  const { mutateAsync: registerRestaurantFn } = useMutation({
+    mutationFn: registerRestaurant,
+  });
+
   async function handleSignUp(data: signUpForm) {
     try {
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      await registerRestaurantFn({
+        restaurantName: data.restaurantName,
+        phone: data.phone,
+        managerName: data.managerName,
+        email: data.email,
+      });
 
       toast.success('Restaurante cadastrado com sucesso', {
         action: {
           label: 'Login',
-          onClick: () => navigate('/sign-in'),
+          onClick: () => navigate(`/sign-in?email=${data.email}`),
         },
       });
     } catch {
@@ -72,7 +83,7 @@ export function SignUp() {
 
             <div className="space-y-2">
               <Label htmlFor="phone">Seu Celular</Label>
-              <Input id="phone" type="tel" {...register('restaurantPhone')} />
+              <Input id="phone" type="tel" {...register('phone')} />
             </div>
 
             <Button disabled={isSubmitting} className="w-full" type="submit">
